@@ -1,9 +1,19 @@
 import React, { Component } from "react";
 import axios from 'axios';
+import Cookies from 'universal-cookie';
+import Alert from 'react-bootstrap/Alert';
 
 require('dotenv').config();
 
+const cookies = new Cookies();
+
 export default class Login extends Component {
+    
+    constructor(props) {
+        super(props);
+        this.state = { showAlert: false, alertType: '', alertTitle: '', alertText: '' };
+    }
+
     state = {
     	form: {
     		email: '',
@@ -32,16 +42,21 @@ export default class Login extends Component {
 
     	axios.post(url, params)
     	.then(response => {
-    		console.log(response)
+            cookies.set('user', response.data);
     		this.props.history.push('/home');
     	})
     	.catch(error => {
-    		alert("You have entered an invalid username or password!");
+            this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'You have entered an invalid username or password!'});
     		console.log(error);
+            setTimeout(function() {
+                this.setState({showAlert: false});
+            }.bind(this), 5000)
     	})
     }
 
     render() {
+        const { showAlert, alertType, alertTitle, alertText } = this.state;
+
         return (
             <form onSubmit={this.submitHandler}>
                 <h3>Sign In</h3>
@@ -61,6 +76,15 @@ export default class Login extends Component {
                 <div className="form-group">
                 	<button type="submit" className="btn btn-primary btn-block">Submit</button>
                 </div>
+
+                <br></br>
+
+                {alertType === 'danger' ? ( 
+                    <Alert show={showAlert} variant="danger">
+                        <Alert.Heading>{alertTitle}</Alert.Heading>
+                        <p>{alertText}</p>
+                    </Alert>
+                ) : ''}
             </form>
         );
     }

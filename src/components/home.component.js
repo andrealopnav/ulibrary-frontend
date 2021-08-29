@@ -1,12 +1,16 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-
+import Cookies from 'universal-cookie';
 import SignUp from "./signup.component";
 import Book from "./book.component";
 import NewBook from "./newbook.component";
 
+const cookies = new Cookies();
+
 export default class Home extends Component {
 	render() {
+    const name = cookies.get('user').name;
+    const role = cookies.get('user').role;
         return (
         	<Router>
     
@@ -21,14 +25,19 @@ export default class Home extends Component {
               <li className="nav-item">
                 <Link className="nav-link" to={"/books"}>Books</Link>
               </li>
-              <li className="nav-item">
-                <Link className="nav-link" to={"/sign-up"}>New User</Link>
-              </li>
+              {role === 'librarian' ? ( 
+                <li className="nav-item">
+                  <Link className="nav-link" to={"/sign-up"}>New User</Link>
+                </li>
+              ) : ''}
+              {role === 'librarian' ? ( 
               <li className="nav-item">
                 <Link className="nav-link" to={"/new-book"}>New Book</Link>
               </li>
+              ) : ''}
             </ul>
           </div>
+          {name}
         </div>
       </nav>
 

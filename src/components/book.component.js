@@ -1,34 +1,43 @@
 import React, { Component } from "react";
 import Modal from "react-bootstrap/Modal";
 import axios from 'axios';
+import Cookies from 'universal-cookie';
+import Alert from 'react-bootstrap/Alert';
 
 require('dotenv').config();
+
+const cookies = new Cookies();
 
 export default class Book extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { isLoading: true, booksList: undefined, show: false, stockList: [], modalTitle: '', bookId: '' };
+    this.state = { isLoading: true, booksList: undefined, show: false, stockList: [], modalTitle: '', bookId: '',
+    showAlert: false, alertType: '', alertTitle: '', alertText: '' };
   }
   
   componentDidMount() {
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTI4MGI5MDUwMWUwYTkyMmFmMmE0MjgiLCJpYXQiOjE2MzAyMDYzNjZ9.268ZdDtS0HCTJVoeiayHzhbm03xLoV3zsowwP3L9DFE';
+    const token = cookies.get('user').token;
 
     const url = process.env.REACT_APP_API_URL + '/api/books';
 
     axios.get(url, { headers: {"Authorization" : `Bearer ${token}`} })
       .then(response => {
         this.setState({ booksList: response.data });
-        this.setState({ isLoading: false });      
+        this.setState({ isLoading: false });
       }).catch(error => {
-        alert("An error has occurred on an attempt to load data!");
+        this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'An error has occurred on an attempt to load data!'});
         console.log(error);
+        setTimeout(function() {
+          this.setState({showAlert: false});
+        }.bind(this), 5000);
       });
   }
 
   render() {
-    const { isLoading, booksList, show, stockList, modalTitle, bookId } = this.state;
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTI4MGI5MDUwMWUwYTkyMmFmMmE0MjgiLCJpYXQiOjE2MzAyMDYzNjZ9.268ZdDtS0HCTJVoeiayHzhbm03xLoV3zsowwP3L9DFE';
+    const { isLoading, booksList, show, stockList, modalTitle, bookId,
+    showAlert, alertType, alertTitle, alertText } = this.state;
+    const token = cookies.get('user').token;
     
     const handleClose = () => {
       this.setState({ show: false });
@@ -50,16 +59,22 @@ export default class Book extends Component {
       const params = {
         book_id: bookId,
         stock_id: stockId,
-        user_id: '61280179580032ce8f7b9ec1',
+        user_id: cookies.get('user').id,
         status: status
       };
 
       axios.patch(url, params, { headers: {"Authorization" : `Bearer ${token}`} })
       .then(response => {
-        this.setState({ show: false });
+        this.setState({ show: false, showAlert: true, alertType: 'success', alertTitle: 'Success', alertText: 'You have rented/reserved the book successfully!'});
+        setTimeout(function() {
+          this.setState({showAlert: false});
+        }.bind(this), 5000);
       }).catch(error => {
-        alert("An error has occurred on an attempt to update data!");
+        this.setState({ show: false, showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'An error has occurred on an attempt to update data!'});
         console.log(error);
+        setTimeout(function() {
+          this.setState({showAlert: false});
+        }.bind(this), 5000);
       });
     }
     
@@ -117,6 +132,18 @@ export default class Book extends Component {
             {booksList.map(renderBook)}
           </tbody>
         </table>
+
+        {alertType === 'success' ? ( 
+          <Alert show={showAlert} variant="success">
+            <Alert.Heading>{alertTitle}</Alert.Heading>
+            <p>{alertText}</p>
+          </Alert>
+        ) : (
+          <Alert show={showAlert} variant="danger">
+            <Alert.Heading>{alertTitle}</Alert.Heading>
+            <p>{alertText}</p>
+          </Alert>
+        )}
         
         <Modal show={show} onHide={handleClose}>
           <Modal.Header>

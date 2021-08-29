@@ -1,9 +1,19 @@
 import React, { Component } from "react";
 import axios from 'axios';
+import Cookies from 'universal-cookie';
+import Alert from 'react-bootstrap/Alert';
 
 require('dotenv').config();
 
+const cookies = new Cookies();
+
 export default class SignUp extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = { showAlert: false, alertType: '', alertTitle: '', alertText: '' };
+    }
+
     state = {
         form: {
             firstName: '',
@@ -25,7 +35,7 @@ export default class SignUp extends Component {
 
     submitHandler = e => {
         e.preventDefault();
-        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTI4MGI5MDUwMWUwYTkyMmFmMmE0MjgiLCJpYXQiOjE2MzAyMDYzNjZ9.268ZdDtS0HCTJVoeiayHzhbm03xLoV3zsowwP3L9DFE';
+        const token = cookies.get('user').token;
         
         const url = process.env.REACT_APP_API_URL + '/api/user';
 
@@ -34,21 +44,29 @@ export default class SignUp extends Component {
             last_name: this.state.form.lastName, 
             email: this.state.form.email, 
             password: this.state.form.password,
-            role: "student" 
+            role: (this.state.form.role === 1) ? 'student' : 'librarian' 
         };
         
         axios.post(url, params, { headers: {"Authorization" : `Bearer ${token}`} })
         .then(response => {
-            console.log(response);
-            this.props.history.push('/home');
+            this.setState({ show: false, showAlert: true, alertType: 'success', alertTitle: 'Success', alertText: 'Successful user creation!'});
+            setTimeout(function() {
+              this.setState({showAlert: false});
+              this.props.history.push('/home');
+            }.bind(this), 4000);
         })
         .catch(error => {
-            alert("We're sorry, something went wrong while creating new user!");
+            this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: "We're sorry, something went wrong while creating new user!"});
             console.log(error);
+            setTimeout(function() {
+                this.setState({showAlert: false});
+            }.bind(this), 5000);
         })
     }
 
     render() {
+        const { showAlert, alertType, alertTitle, alertText } = this.state;
+
         return (
             <form onSubmit={this.submitHandler}>
                 <h3>Create User</h3>
@@ -75,7 +93,7 @@ export default class SignUp extends Component {
 
                 <div className="form-group">
                     <label>Role</label>
-                    <select className="form-select" aria-label="Default select example">
+                    <select className="form-select">
                         <option defaultValue>Select...</option>
                         <option value="1">Student</option>
                         <option value="2">Librarian</option>
@@ -85,6 +103,20 @@ export default class SignUp extends Component {
                 <br></br>
 
                 <button type="submit" className="btn btn-primary btn-block">Submit</button>
+
+                <br></br>
+
+                {alertType === 'success' ? ( 
+                  <Alert show={showAlert} variant="success">
+                    <Alert.Heading>{alertTitle}</Alert.Heading>
+                    <p>{alertText}</p>
+                  </Alert>
+                ) : (
+                  <Alert show={showAlert} variant="danger">
+                    <Alert.Heading>{alertTitle}</Alert.Heading>
+                    <p>{alertText}</p>
+                  </Alert>
+                )}
             </form>
         );
     }
