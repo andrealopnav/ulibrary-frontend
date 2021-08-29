@@ -1,13 +1,16 @@
 import React, { Component } from "react";
 import axios from 'axios';
 
+require('dotenv').config();
+
 export default class SignUp extends Component {
     state = {
         form: {
             firstName: '',
             lastName: '',
             email: '',
-            password: ''
+            password: '',
+            role: ''
         }
     }
 
@@ -21,20 +24,26 @@ export default class SignUp extends Component {
     }
 
     submitHandler = e => {
-        e.preventDefault()
+        e.preventDefault();
+        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTI4MGI5MDUwMWUwYTkyMmFmMmE0MjgiLCJpYXQiOjE2MzAyMDYzNjZ9.268ZdDtS0HCTJVoeiayHzhbm03xLoV3zsowwP3L9DFE';
         
-        axios.post('http://localhost:3001/api/user', { 
+        const url = process.env.REACT_APP_API_URL + '/api/user';
+
+        const params = { 
             first_name: this.state.form.firstName, 
             last_name: this.state.form.lastName, 
             email: this.state.form.email, 
             password: this.state.form.password,
-            role: "student" })
+            role: "student" 
+        };
+        
+        axios.post(url, params, { headers: {"Authorization" : `Bearer ${token}`} })
         .then(response => {
-            console.log(response)
-            this.props.history.push('/sign-in');
+            console.log(response);
+            this.props.history.push('/home');
         })
         .catch(error => {
-            alert("We're sorry, something went wrong when attempting to sign up!");
+            alert("We're sorry, something went wrong while creating new user!");
             console.log(error);
         })
     }
@@ -63,6 +72,17 @@ export default class SignUp extends Component {
                     <label>Password</label>
                     <input type="password" className="form-control" name="password" onChange={this.handleChange} placeholder="Enter password" />
                 </div>
+
+                <div className="form-group">
+                    <label>Role</label>
+                    <select className="form-select" aria-label="Default select example">
+                        <option defaultValue>Select...</option>
+                        <option value="1">Student</option>
+                        <option value="2">Librarian</option>
+                    </select>                    
+                </div>
+
+                <br></br>
 
                 <button type="submit" className="btn btn-primary btn-block">Submit</button>
             </form>

@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import axios from 'axios';
 
+require('dotenv').config();
+
 export default class Login extends Component {
     state = {
     	form: {
@@ -18,33 +20,17 @@ export default class Login extends Component {
     	});
     }
 
-    login() {
-    	console.log('entra al login');
-    	/*const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: this.state.form.email, password: this.state.form.password })
-    };
-    fetch('http://localhost:3001/api/users/login', requestOptions)
-        .then(response => console.log(response.json()))
-        .then(data => console.log(data));*/
-    	/*e.preventDefault();
-    	axios.post('http://localhost:3001/api/users/login', {
-  				email: this.state.form.email,
-  				password: this.state.form.password
-		})
-		.then((response) => {
-		  console.log('exito :D');
-		  console.log(response);
-		}, (error) => {
-		  console.log(error);
-		});*/
-    }
-
     submitHandler = e => {
-    	e.preventDefault()
+    	e.preventDefault();
+
+        const url = process.env.REACT_APP_API_URL + '/api/users/login';
     	
-    	axios.post('http://localhost:3001/api/users/login', { email: this.state.form.email, password: this.state.form.password })
+        const params = {
+            email: this.state.form.email, 
+            password: this.state.form.password
+        };
+
+    	axios.post(url, params)
     	.then(response => {
     		console.log(response)
     		this.props.history.push('/home');
@@ -69,6 +55,8 @@ export default class Login extends Component {
                     <label>Password</label>
                     <input type="password" className="form-control" name="password" onChange={this.handleChange} placeholder="Enter password" />
                 </div>
+
+                <br></br>
 
                 <div className="form-group">
                 	<button type="submit" className="btn btn-primary btn-block">Submit</button>

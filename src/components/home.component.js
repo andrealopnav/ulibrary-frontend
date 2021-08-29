@@ -1,10 +1,9 @@
-
 import React, { Component } from "react";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
 import SignUp from "./signup.component";
 import Book from "./book.component";
-
+import NewBook from "./newbook.component";
 
 export default class Home extends Component {
 	render() {
@@ -25,6 +24,9 @@ export default class Home extends Component {
               <li className="nav-item">
                 <Link className="nav-link" to={"/sign-up"}>New User</Link>
               </li>
+              <li className="nav-item">
+                <Link className="nav-link" to={"/new-book"}>New Book</Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -36,6 +38,7 @@ export default class Home extends Component {
           <Switch>
             <Route path="/sign-up" component={SignUp} />
             <Route path="/books" component={Book} />
+            <Route path="/new-book" component={NewBook} />
           </Switch>
         </div>
       </div>
