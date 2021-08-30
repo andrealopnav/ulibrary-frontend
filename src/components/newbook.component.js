@@ -46,11 +46,18 @@ export default class NewBook extends Component {
         
         axios.post(url, params, { headers: {"Authorization" : `Bearer ${token}`} })
         .then(response => {
-            this.setState({ show: false, showAlert: true, alertType: 'success', alertTitle: 'Success', alertText: 'Successful book addition!'});
-            setTimeout(function() {
-              this.setState({showAlert: false});
-              this.props.history.push('/home');
-            }.bind(this), 4000);
+            if (response.data.code === 200) {
+                this.setState({ show: false, showAlert: true, alertType: 'success', alertTitle: 'Success', alertText: 'Successful book addition!'});
+                setTimeout(function() {
+                  this.setState({showAlert: false});
+                  this.props.history.push('/home');
+                }.bind(this), 4000);
+            } else {
+                this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'An error has occurred. Try again!'});
+                setTimeout(function() {
+                    this.setState({showAlert: false});
+                }.bind(this), 5000)
+            }
         })
         .catch(error => {
             this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: "We're sorry, something went wrong while adding new book!"});

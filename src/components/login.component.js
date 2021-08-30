@@ -42,8 +42,15 @@ export default class Login extends Component {
 
     	axios.post(url, params)
     	.then(response => {
-            cookies.set('user', response.data);
-    		this.props.history.push('/home');
+            if (response.data.code === 200) {
+                cookies.set('user', response.data.result);
+                this.props.history.push('/home');
+            } else {
+                this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'An error has occurred. Try again!'});
+                setTimeout(function() {
+                    this.setState({showAlert: false});
+                }.bind(this), 5000)
+            }
     	})
     	.catch(error => {
             this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'You have entered an invalid username or password!'});

@@ -23,8 +23,15 @@ export default class Book extends Component {
 
     axios.get(url, { headers: {"Authorization" : `Bearer ${token}`} })
       .then(response => {
-        this.setState({ booksList: response.data });
-        this.setState({ isLoading: false });
+        if (response.data.code === 200) {
+          this.setState({ booksList: response.data.result });
+          this.setState({ isLoading: false });
+        } else {
+          this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'An error has occurred. Try again!'});
+          setTimeout(function() {
+            this.setState({showAlert: false});
+          }.bind(this), 5000)
+        }
       }).catch(error => {
         this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'An error has occurred on an attempt to load data!'});
         console.log(error);
@@ -58,17 +65,26 @@ export default class Book extends Component {
 
       const params = {
         book_id: bookId,
+        book_info: modalTitle,
         stock_id: stockId,
         user_id: cookies.get('user').id,
+        user_name: cookies.get('user').name,
         status: status
       };
 
       axios.patch(url, params, { headers: {"Authorization" : `Bearer ${token}`} })
       .then(response => {
-        this.setState({ show: false, showAlert: true, alertType: 'success', alertTitle: 'Success', alertText: 'You have rented/reserved the book successfully!'});
-        setTimeout(function() {
-          this.setState({showAlert: false});
-        }.bind(this), 5000);
+        if (response.data.code === 200) {
+          this.setState({ show: false, showAlert: true, alertType: 'success', alertTitle: 'Success', alertText: 'You have rented/reserved the book successfully!'});
+          setTimeout(function() {
+            this.setState({showAlert: false});
+          }.bind(this), 5000);
+        } else {
+          this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'An error has occurred. Try again!'});
+          setTimeout(function() {
+            this.setState({showAlert: false});
+          }.bind(this), 5000);
+        }
       }).catch(error => {
         this.setState({ show: false, showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'An error has occurred on an attempt to update data!'});
         console.log(error);

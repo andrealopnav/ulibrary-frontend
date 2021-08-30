@@ -49,11 +49,19 @@ export default class SignUp extends Component {
         
         axios.post(url, params, { headers: {"Authorization" : `Bearer ${token}`} })
         .then(response => {
-            this.setState({ show: false, showAlert: true, alertType: 'success', alertTitle: 'Success', alertText: 'Successful user creation!'});
-            setTimeout(function() {
-              this.setState({showAlert: false});
-              this.props.history.push('/home');
-            }.bind(this), 4000);
+            if (response.data.code === 200) {
+                const user = response.data.result;
+                this.setState({ show: false, showAlert: true, alertType: 'success', alertTitle: 'Success', alertText: 'Successful user creation! User: ' + user.first_name + ' ' + user.last_name});
+                setTimeout(function() {
+                  this.setState({showAlert: false});
+                  this.props.history.push('/home');
+                }.bind(this), 4000);
+            } else {
+                this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: 'An error has occurred. Try again!'});
+                setTimeout(function() {
+                    this.setState({showAlert: false});
+                }.bind(this), 5000)
+            }
         })
         .catch(error => {
             this.setState({ showAlert: true, alertType: 'danger', alertTitle: 'Error', alertText: "We're sorry, something went wrong while creating new user!"});
